@@ -13,7 +13,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.liflux.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "LiFlux needs access to your photos to add images and videos to your notes.",
+        "NSCameraUsageDescription": "LiFlux needs access to your camera to take photos for your notes."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +26,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.liflux.app",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-image-picker",
+      "expo-file-system"
+    ]
   }
 }
