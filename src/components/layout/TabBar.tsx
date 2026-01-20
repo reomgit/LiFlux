@@ -7,12 +7,6 @@ import {
   isLiquidGlassAvailable,
 } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-  SharedValue,
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, icons } from '../common/Icon';
 import { colors } from '../../theme/colors';
@@ -22,43 +16,19 @@ import { glassConfig } from '../../theme/glass';
 
 const isNativeGlassAvailable = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
+// Simplified interface removing Reanimated SharedValue
 interface TabBarProps extends BottomTabBarProps {
-  scrollY?: SharedValue<number>;
+  // scrollY?: SharedValue<number>; // Removed
 }
 
 const TAB_ICONS: Record<string, keyof typeof icons> = {
-  HomeTab: 'Home',
-  SettingsTab: 'Settings',
+  index: 'Home',
+  settings: 'Settings',
 };
 
-export function TabBar({ state, descriptors, navigation, scrollY }: TabBarProps) {
+// Removed scrollY from destructuring
+export function TabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
-
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    if (!scrollY) {
-      return { height: 56 + insets.bottom };
-    }
-
-    const height = interpolate(
-      scrollY.value,
-      [0, 100],
-      [56 + insets.bottom, 44 + insets.bottom],
-      'clamp'
-    );
-
-    return { height };
-  });
-
-  const animatedLabelStyle = useAnimatedStyle(() => {
-    if (!scrollY) {
-      return { opacity: 1, height: 16 };
-    }
-
-    const opacity = interpolate(scrollY.value, [0, 50], [1, 0], 'clamp');
-    const height = interpolate(scrollY.value, [0, 50], [16, 0], 'clamp');
-
-    return { opacity, height };
-  });
 
   const config = glassConfig.navigation;
 
@@ -90,11 +60,10 @@ export function TabBar({ state, descriptors, navigation, scrollY }: TabBarProps)
   };
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.container,
-        { paddingBottom: insets.bottom },
-        animatedContainerStyle,
+        { paddingBottom: insets.bottom, height: 56 + insets.bottom },
       ]}
     >
       {renderBackground()}
@@ -132,7 +101,7 @@ export function TabBar({ state, descriptors, navigation, scrollY }: TabBarProps)
                 size={24}
                 color={isFocused ? colors.primary[600] : colors.neutral[400]}
               />
-              <Animated.View style={animatedLabelStyle}>
+              <View style={{ opacity: 1, height: 16 }}>
                 <Text
                   style={[
                     styles.label,
@@ -142,12 +111,12 @@ export function TabBar({ state, descriptors, navigation, scrollY }: TabBarProps)
                 >
                   {typeof label === 'string' ? label : route.name}
                 </Text>
-              </Animated.View>
+              </View>
             </Pressable>
           );
         })}
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

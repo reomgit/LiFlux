@@ -5,8 +5,9 @@ import {
   Text,
   ActivityIndicator,
   RefreshControl,
+  FlatList,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+// import Animated from 'react-native-reanimated';
 import { NoteCard } from './NoteCard';
 import { Icon } from '../common/Icon';
 import { Note, NotePreview } from '../../types';
@@ -17,7 +18,8 @@ import { spacing } from '../../theme/spacing';
 interface NoteListProps {
   notes: Note[];
   onNotePress: (noteId: string) => void;
-  onScroll?: (event: any) => void;
+  // onScroll?: (event: any) => void; // Removed Animated scroll handler type
+  onScroll?: any;
   isLoading?: boolean;
   emptyMessage?: string;
   onRefresh?: () => void;
@@ -82,7 +84,7 @@ export function NoteList({
   }
 
   return (
-    <Animated.FlatList
+    <FlatList
       data={notes}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
@@ -105,7 +107,7 @@ export function NoteList({
 
 const styles = StyleSheet.create({
   list: {
-    paddingBottom: 180,
+    paddingBottom: 20,
   },
   centered: {
     flex: 1,

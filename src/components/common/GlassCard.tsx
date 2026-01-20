@@ -1,11 +1,11 @@
 import React from 'react';
-import { Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, ViewStyle, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+// import Animated, {
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withSpring,
+// } from 'react-native-reanimated';
 import { GlassContainer, GlassVariant } from './GlassContainer';
 import { spacing } from '../../theme/spacing';
 
@@ -18,7 +18,7 @@ interface GlassCardProps {
   hapticFeedback?: boolean;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function GlassCard({
   children,
@@ -28,21 +28,21 @@ export function GlassCard({
   contentStyle,
   hapticFeedback = true,
 }: GlassCardProps) {
-  const scale = useSharedValue(1);
+  // const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  // const animatedStyle = useAnimatedStyle(() => ({
+  //   transform: [{ scale: scale.value }],
+  // }));
 
   const handlePressIn = () => {
     if (onPress) {
-      scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
+      // scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
     }
   };
 
   const handlePressOut = () => {
     if (onPress) {
-      scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+      // scale.value = withSpring(1, { damping: 15, stiffness: 400 });
     }
   };
 
@@ -57,22 +57,25 @@ export function GlassCard({
 
   const content = (
     <GlassContainer variant={variant} style={[styles.card, style]}>
-      <Animated.View style={[styles.content, contentStyle]}>
+      <View style={[styles.content, contentStyle]}>
         {children}
-      </Animated.View>
+      </View>
     </GlassContainer>
   );
 
   if (onPress) {
     return (
-      <AnimatedPressable
+      <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={animatedStyle}
+        style={({ pressed }) => [
+          // animatedStyle
+          { transform: [{ scale: pressed ? 0.98 : 1 }] },
+        ]}
       >
         {content}
-      </AnimatedPressable>
+      </Pressable>
     );
   }
 

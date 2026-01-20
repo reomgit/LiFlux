@@ -7,11 +7,11 @@ import {
   TextStyle,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+// import Animated, {
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withSpring,
+// } from 'react-native-reanimated';
 import { GlassContainer, GlassVariant } from './GlassContainer';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -29,7 +29,7 @@ interface GlassButtonProps {
   hapticFeedback?: boolean;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function GlassButton({
   onPress,
@@ -42,18 +42,18 @@ export function GlassButton({
   disabled = false,
   hapticFeedback = true,
 }: GlassButtonProps) {
-  const scale = useSharedValue(1);
+  // const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  // const animatedStyle = useAnimatedStyle(() => ({
+  //   transform: [{ scale: scale.value }],
+  // }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    // scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    // scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
   const handlePress = () => {
@@ -76,12 +76,16 @@ export function GlassButton({
   };
 
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
-      style={[animatedStyle, disabled && styles.disabled]}
+      style={({ pressed }) => [
+        // animatedStyle,
+        { opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
+        disabled && styles.disabled,
+      ]}
     >
       <GlassContainer
         variant={variant}
@@ -102,7 +106,7 @@ export function GlassButton({
           </Text>
         )}
       </GlassContainer>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 

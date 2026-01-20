@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Platform, StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   GlassView,
   isLiquidGlassAvailable,
@@ -72,6 +73,15 @@ export function GlassContainer({
           StyleSheet.absoluteFill,
           { backgroundColor: config.backgroundColor },
         ]}
+      />
+      <LinearGradient
+        colors={[
+          'rgba(255, 255, 255, 0.25)',
+          'rgba(255, 255, 255, 0.1)',
+          'rgba(255, 255, 255, 0.15)',
+        ]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFill}
       />
       <View style={styles.content}>{children}</View>
     </View>

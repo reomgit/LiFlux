@@ -12,11 +12,11 @@ import {
   GlassView,
   isLiquidGlassAvailable,
 } from 'expo-glass-effect';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+// import Animated, {
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withSpring,
+// } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../common/Icon';
 import { colors } from '../../theme/colors';
@@ -32,7 +32,7 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function SearchBar({
   value,
@@ -41,28 +41,28 @@ export function SearchBar({
 }: SearchBarProps) {
   const insets = useSafeAreaInsets();
   const [isFocused, setIsFocused] = useState(false);
-  const scale = useSharedValue(1);
+  // const scale = useSharedValue(1);
 
   const config = glassConfig.searchBar;
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
-    scale.value = withSpring(1.02, { damping: 15, stiffness: 400 });
-  }, [scale]);
+    // scale.value = withSpring(1.02, { damping: 15, stiffness: 400 });
+  }, []);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
-  }, [scale]);
+    // scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+  }, []);
 
   const handleClear = useCallback(() => {
     onChangeText('');
     Keyboard.dismiss();
   }, [onChangeText]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  // const animatedStyle = useAnimatedStyle(() => ({
+  //   transform: [{ scale: scale.value }],
+  // }));
 
   const renderBackground = () => {
     if (isNativeGlassAvailable) {
@@ -92,15 +92,14 @@ export function SearchBar({
     );
   };
 
-  // Position above tab bar (56px) + some padding
-  const bottomPosition = 56 + insets.bottom + spacing.sm;
+  // const bottomPosition = 56 + insets.bottom + spacing.sm;
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.container,
-        { bottom: bottomPosition },
-        animatedStyle,
+        // { bottom: bottomPosition },
+        // animatedStyle,
       ]}
     >
       <View style={styles.wrapper}>
@@ -123,21 +122,20 @@ export function SearchBar({
             clearButtonMode="never"
           />
           {value.length > 0 && (
-            <AnimatedPressable onPress={handleClear} style={styles.clearButton}>
+            <Pressable onPress={handleClear} style={styles.clearButton}>
               <Icon name="X" size={16} color={colors.neutral[500]} />
-            </AnimatedPressable>
+            </Pressable>
           )}
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
     zIndex: 50,
   },
   wrapper: {

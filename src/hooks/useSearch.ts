@@ -21,10 +21,15 @@ export function useSearch(notes: Note[]) {
 
     const normalizedQuery = debouncedQuery.toLowerCase().trim();
 
-    return notes.filter((note) => {
-      const content = note.content.toLowerCase();
-      return content.includes(normalizedQuery);
-    });
+    const MAX_RESULTS = 50;
+
+    return notes
+      .filter((note) => {
+        if (note.isTrashed) return false;
+        const content = note.content.toLowerCase();
+        return content.includes(normalizedQuery);
+      })
+      .slice(0, MAX_RESULTS);
   }, [notes, debouncedQuery]);
 
   const clearSearch = useCallback(() => {

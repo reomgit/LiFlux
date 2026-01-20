@@ -37,9 +37,13 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "liflux",
     "plugins": [
+      "expo-router",
       "expo-image-picker",
-      "expo-file-system"
+      "expo-file-system",
+      "expo-asset",
+      "expo-font"
     ]
   }
 }

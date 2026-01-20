@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+// import Animated, {
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withSpring,
+// } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import { GlassContainer } from '../common/GlassContainer';
 import { Icon } from '../common/Icon';
@@ -19,7 +19,7 @@ interface FloatingActionButtonProps {
   bottom?: number;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function FloatingActionButton({
   onPress,
@@ -27,24 +27,24 @@ export function FloatingActionButton({
   style,
   bottom = 100,
 }: FloatingActionButtonProps) {
-  const scale = useSharedValue(1);
-  const rotate = useSharedValue(0);
+  // const scale = useSharedValue(1);
+  // const rotate = useSharedValue(0);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { rotate: `${rotate.value}deg` },
-    ],
-  }));
+  // const animatedStyle = useAnimatedStyle(() => ({
+  //   transform: [
+  //     { scale: scale.value },
+  //     { rotate: `${rotate.value}deg` },
+  //   ],
+  // }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.9, { damping: 15, stiffness: 400 });
-    rotate.value = withSpring(90, { damping: 15, stiffness: 400 });
+    // scale.value = withSpring(0.9, { damping: 15, stiffness: 400 });
+    // rotate.value = withSpring(90, { damping: 15, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
-    rotate.value = withSpring(0, { damping: 15, stiffness: 400 });
+    // scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    // rotate.value = withSpring(0, { damping: 15, stiffness: 400 });
   };
 
   const handlePress = () => {
@@ -53,16 +53,22 @@ export function FloatingActionButton({
   };
 
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, { bottom }, animatedStyle, style]}
+      style={({ pressed }) => [
+        styles.container,
+        { bottom },
+        // animatedStyle,
+        { transform: [{ scale: pressed ? 0.9 : 1 }] },
+        style,
+      ]}
     >
       <GlassContainer variant="fab" style={styles.button} borderRadiusSize="full">
         <Icon name={icon} size={28} color={colors.neutral[0]} />
       </GlassContainer>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
