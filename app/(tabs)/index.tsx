@@ -1,6 +1,7 @@
-import { useCallback } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
+import { useCallback, useState, useEffect } from 'react';
+import { StyleSheet, View, Text, Platform, Keyboard, KeyboardEvent } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen } from '../../src/components/layout/Screen';
 import { GlassButton } from '../../src/components/common/GlassButton';
 import { Icon } from '../../src/components/common/Icon';
@@ -16,6 +17,31 @@ export default function HomeScreen() {
   const router = useRouter();
   const { notes, isLoading } = useNotes();
   const { query, setQuery, filteredNotes } = useSearch(notes);
+  const insets = useSafeAreaInsets();
+  
+  const tabBarHeight = 56 + insets.bottom;
+  const [bottomOffset, setBottomOffset] = useState(tabBarHeight);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, (e: KeyboardEvent) => {
+      // "Teleport" to the keyboard height immediately.
+      // SearchBar has internal marginBottom of spacing.sm (8).
+      // If we want it strictly on top, we just set the margin to keyboard height.
+      // e.endCoordinates.height includes the safe area bottom.
+      setBottomOffset(e.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setBottomOffset(tabBarHeight);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [tabBarHeight]);
 
   const handleCreateNote = useCallback(() => {
     router.push('/create');
@@ -49,24 +75,22 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <NoteList
-        notes={displayNotes}
-        onNotePress={handleNotePress}
-        isLoading={isLoading}
-        emptyMessage={query ? 'No notes found' : 'Create your first note'}
-      />
+      <View style={{ flex: 1 }}>
+        <NoteList
+          notes={displayNotes}
+          onNotePress={handleNotePress}
+          isLoading={isLoading}
+          emptyMessage={query ? 'No notes found' : 'Create your first note'}
+        />
+      </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        style={{ marginBottom: 60 + spacing.sm }}
-      >
+      <View style={{ marginBottom: bottomOffset }}>
         <SearchBar
           value={query}
           onChangeText={setQuery}
           placeholder="Search notes..."
         />
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }
