@@ -8,7 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 // import Animated from 'react-native-reanimated';
-import { NoteCard } from './NoteCard';
+import { SwipeableNoteCard } from './SwipeableNoteCard';
 import { Icon } from '../common/Icon';
 import { Note, NotePreview } from '../../types';
 import { colors } from '../../theme/colors';
@@ -18,6 +18,8 @@ import { spacing } from '../../theme/spacing';
 interface NoteListProps {
   notes: Note[];
   onNotePress: (noteId: string) => void;
+  onDeleteNote?: (noteId: string) => void;
+  onTogglePin?: (noteId: string) => void;
   // onScroll?: (event: any) => void; // Removed Animated scroll handler type
   onScroll?: any;
   isLoading?: boolean;
@@ -28,6 +30,8 @@ interface NoteListProps {
 export function NoteList({
   notes,
   onNotePress,
+  onDeleteNote,
+  onTogglePin,
   onScroll,
   isLoading = false,
   emptyMessage = 'No notes yet',
@@ -35,7 +39,7 @@ export function NoteList({
 }: NoteListProps) {
   const toPreview = useCallback((note: Note): NotePreview => {
     const lines = note.content.split('\n').filter((line) => line.trim());
-    const title = lines[0]?.substring(0, 50) || 'Untitled';
+    const title = note.title || lines[0]?.substring(0, 50) || 'Untitled';
     const snippet = note.content.substring(0, 100);
 
     return {
@@ -45,6 +49,7 @@ export function NoteList({
       thumbnailUri: note.attachments[0]?.thumbnailUri || note.attachments[0]?.uri,
       attachmentCount: note.attachments.length,
       updatedAt: note.updatedAt,
+      isPinned: note.isPinned,
     };
   }, []);
 
@@ -52,13 +57,15 @@ export function NoteList({
     ({ item }: { item: Note }) => {
       const preview = toPreview(item);
       return (
-        <NoteCard
+        <SwipeableNoteCard
           note={preview}
           onPress={() => onNotePress(item.id)}
+          onDelete={() => onDeleteNote?.(item.id)}
+          onTogglePin={() => onTogglePin?.(item.id)}
         />
       );
     },
-    [onNotePress, toPreview]
+    [onNotePress, onDeleteNote, onTogglePin, toPreview]
   );
 
   const keyExtractor = useCallback((item: Note) => item.id, []);

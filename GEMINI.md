@@ -10,7 +10,8 @@ This project is guided by an AI Project Manager (Gemini) whose role is to:
 - **Support:** Assist with bugfixing, resolving build errors, file organization, and Git workflow management (commits, pushes, etc.).
 
 ## Tech Stack
-- **Runtime & Package Manager:** [Bun](https://bun.sh)
+- **Runtime & Package Manager:** [Bun](https://bun.sh) 
+    * DO NOT USE NPM. IF YOU SEE AN NPM COMMAND, ALWAYS REPLACE IT WITH BUN.
 - **Framework:** [Expo](https://expo.dev) (React Native)
 - **Language:** TypeScript
 - **Storage/Backend:** iCloud (CloudKit) via `react-native-cloudkit` or native modules.

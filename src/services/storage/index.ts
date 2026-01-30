@@ -1,14 +1,12 @@
+import { IStorageService } from './StorageService';
+import { fileSystemStorageService } from './FileSystemStorageService';
+
 export * from './StorageService';
 export * from './AsyncStorageService';
+export * from './FileSystemStorageService';
 
-import { IStorageService } from './StorageService';
-import { AsyncStorageService } from './AsyncStorageService';
-
-let storageInstance: IStorageService | null = null;
+export const storageService = fileSystemStorageService;
 
 export function getStorageService(): IStorageService {
-  if (!storageInstance) {
-    storageInstance = new AsyncStorageService();
-  }
-  return storageInstance;
+  return fileSystemStorageService;
 }

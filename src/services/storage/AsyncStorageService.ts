@@ -26,9 +26,11 @@ export class AsyncStorageService implements IStorageService {
       }
     }
 
-    return notes.sort(
-      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+    return notes.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
   }
 
   async getNoteById(id: string): Promise<Note | null> {
@@ -64,6 +66,8 @@ export class AsyncStorageService implements IStorageService {
       throw new Error(`Note with id ${id} not found`);
     }
 
+    console.log(`[Storage] Updating note ${id} with:`, JSON.stringify(updates));
+
     const updated: Note = {
       ...existing,
       ...updates,
@@ -71,6 +75,8 @@ export class AsyncStorageService implements IStorageService {
       createdAt: existing.createdAt,
       updatedAt: getCurrentISOString(),
     };
+
+    console.log(`[Storage] Saved note ${id}:`, JSON.stringify(updated));
 
     const key = `${STORAGE_KEYS.NOTE_PREFIX}${id}`;
     await AsyncStorage.setItem(key, JSON.stringify(updated));
@@ -147,7 +153,7 @@ export class AsyncStorageService implements IStorageService {
 
   private toPreview(note: Note): NotePreview {
     const lines = note.content.split('\n').filter((line) => line.trim());
-    const title = lines[0]?.substring(0, 50) || 'Untitled';
+    const title = note.title || lines[0]?.substring(0, 50) || 'Untitled';
     const snippet = note.content.substring(0, 100);
 
     return {
@@ -157,6 +163,7 @@ export class AsyncStorageService implements IStorageService {
       thumbnailUri: note.attachments[0]?.thumbnailUri || note.attachments[0]?.uri,
       attachmentCount: note.attachments.length,
       updatedAt: note.updatedAt,
+      isPinned: note.isPinned,
     };
   }
 

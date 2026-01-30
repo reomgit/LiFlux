@@ -17,7 +17,10 @@
       "bundleIdentifier": "com.liflux.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "LiFlux needs access to your photos to add images and videos to your notes.",
-        "NSCameraUsageDescription": "LiFlux needs access to your camera to take photos for your notes."
+        "NSCameraUsageDescription": "LiFlux needs access to your camera to take photos for your notes.",
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -31,7 +34,9 @@
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
       ]
     },
     "web": {
@@ -44,6 +49,12 @@
       "expo-file-system",
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "265b449c-da26-46d0-9a38-4391883dd8fd"
+      }
+    }
   }
 }

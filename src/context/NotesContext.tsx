@@ -18,6 +18,7 @@ interface NotesContextValue {
   createNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Note>;
   updateNote: (id: string, updates: Partial<Note>) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;
+  togglePin: (id: string) => Promise<void>;
 }
 
 const NotesContext = createContext<NotesContextValue | undefined>(undefined);
@@ -85,6 +86,16 @@ export function NotesProvider({ children }: NotesProviderProps) {
     [storage]
   );
 
+  const togglePin = useCallback(
+    async (id: string) => {
+      const note = notes.find((n) => n.id === id);
+      if (note) {
+        await updateNote(id, { isPinned: !note.isPinned });
+      }
+    },
+    [notes, updateNote]
+  );
+
   const value: NotesContextValue = {
     notes,
     isLoading,
@@ -94,6 +105,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
     createNote,
     updateNote,
     deleteNote,
+    togglePin,
   };
 
   return (

@@ -12,6 +12,7 @@ import { spacing } from '../../theme/spacing';
 interface GlassCardProps {
   children: React.ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
   variant?: GlassVariant;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
@@ -23,6 +24,7 @@ interface GlassCardProps {
 export function GlassCard({
   children,
   onPress,
+  onLongPress,
   variant = 'card',
   style,
   contentStyle,
@@ -63,10 +65,11 @@ export function GlassCard({
     </GlassContainer>
   );
 
-  if (onPress) {
+  if (onPress || onLongPress) {
     return (
       <Pressable
         onPress={handlePress}
+        onLongPress={onLongPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         style={({ pressed }) => [

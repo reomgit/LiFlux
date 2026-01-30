@@ -11,18 +11,24 @@ import { formatNoteDate } from '../../utils/date';
 interface NoteCardProps {
   note: NotePreview;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export function NoteCard({ note, onPress }: NoteCardProps) {
+export function NoteCard({ note, onPress, onLongPress }: NoteCardProps) {
   const hasAttachments = note.attachmentCount > 0;
 
   return (
-    <GlassCard onPress={onPress} style={styles.card}>
+    <GlassCard onPress={onPress} onLongPress={onLongPress} style={styles.card}>
       <View style={styles.content}>
         <View style={styles.textContent}>
-          <Text style={styles.title} numberOfLines={1}>
-            {note.title}
-          </Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1}>
+              {note.title}
+            </Text>
+            {note.isPinned && (
+              <Icon name="Pin" size={14} color={colors.primary[500]} style={styles.pinIcon} />
+            )}
+          </View>
           <Text style={styles.snippet} numberOfLines={2}>
             {note.snippet}
           </Text>
@@ -61,10 +67,18 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: spacing.sm,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
   title: {
     ...typography.titleMedium,
     color: colors.neutral[900],
-    marginBottom: spacing.xs,
+    flex: 1,
+  },
+  pinIcon: {
+    marginLeft: spacing.xs,
   },
   snippet: {
     ...typography.bodyMedium,

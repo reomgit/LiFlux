@@ -10,6 +10,16 @@
         "shadcn@latest",
         "mcp"
       ]
+    },
+    "firebase": {
+      "type": "stdio",
+      "command": "bunx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp"
+      ],
+      "env": {}
     }
   }
 }

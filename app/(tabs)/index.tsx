@@ -15,7 +15,7 @@ import { spacing } from '../../src/theme/spacing';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { notes, isLoading } = useNotes();
+  const { notes, isLoading, deleteNote, togglePin } = useNotes();
   const { query, setQuery, filteredNotes } = useSearch(notes);
   const insets = useSafeAreaInsets();
   
@@ -79,6 +79,8 @@ export default function HomeScreen() {
         <NoteList
           notes={displayNotes}
           onNotePress={handleNotePress}
+          onDeleteNote={deleteNote}
+          onTogglePin={togglePin}
           isLoading={isLoading}
           emptyMessage={query ? 'No notes found' : 'Create your first note'}
         />

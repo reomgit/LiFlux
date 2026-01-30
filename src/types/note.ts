@@ -15,6 +15,7 @@ export interface Attachment {
 
 export interface Note {
   id: string;
+  title?: string;
   content: string;
   attachments: Attachment[];
   createdAt: string;
@@ -22,6 +23,7 @@ export interface Note {
   syncedAt?: string;
   isTrashed: boolean;
   trashedAt?: string;
+  isPinned?: boolean;
 }
 
 export interface NotePreview {
@@ -31,6 +33,7 @@ export interface NotePreview {
   thumbnailUri?: string;
   attachmentCount: number;
   updatedAt: string;
+  isPinned?: boolean;
 }
 
 export interface SearchResult {

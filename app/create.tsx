@@ -26,11 +26,14 @@ export default function CreateNoteScreen() {
   const { createNote } = useNotes();
   const { pickImage, pickVideo } = useMediaPicker();
 
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [showFormatting, setShowFormatting] = useState(false);
 
-  const canSave = content.trim().length > 0 || attachments.length > 0;
+  const canSave = title.trim().length > 0 || content.trim().length > 0 || attachments.length > 0;
 
   const handleSave = useCallback(async () => {
     if (!canSave || isSaving) return;
@@ -38,9 +41,11 @@ export default function CreateNoteScreen() {
     setIsSaving(true);
     try {
       await createNote({
+        title: title.trim(),
         content: content.trim(),
         attachments,
         isTrashed: false,
+        isPinned: false,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
@@ -75,11 +80,20 @@ export default function CreateNoteScreen() {
     setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
   };
 
+  const insertFormat = (prefix: string, suffix: string = '') => {
+    const start = selection.start;
+    const end = selection.end;
+    const selectedText = content.substring(start, end);
+    const newText = content.substring(0, start) + prefix + selectedText + suffix + content.substring(end);
+    setContent(newText);
+  };
+
   return (
     <Screen edges={['top']}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 44 : 0}
       >
         <View style={styles.header}>
           <Pressable onPress={handleClose} style={styles.closeButton}>
@@ -97,14 +111,24 @@ export default function CreateNoteScreen() {
 
         <View style={styles.content}>
           <TextInput
+            style={styles.titleInput}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Title"
+            placeholderTextColor={colors.neutral[400]}
+            multiline
+            maxLength={100}
+            autoFocus
+          />
+          <TextInput
             style={styles.textInput}
             value={content}
             onChangeText={setContent}
+            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder="What's on your mind?"
             placeholderTextColor={colors.neutral[400]}
             multiline
             textAlignVertical="top"
-            autoFocus
           />
 
           {attachments.length > 0 && (
@@ -117,14 +141,37 @@ export default function CreateNoteScreen() {
         </View>
 
         <View style={styles.toolbar}>
-          <Pressable onPress={handleAddImage} style={styles.toolbarButton}>
-            <Icon name="Image" size={24} color={colors.neutral[600]} />
-            <Text style={styles.toolbarLabel}>Photo</Text>
+          <Pressable onPress={() => setShowFormatting(!showFormatting)} style={[styles.toolbarButton, showFormatting && styles.activeButton]}>
+            <Icon name="Type" size={24} color={showFormatting ? colors.primary[600] : colors.neutral[600]} />
           </Pressable>
-          <Pressable onPress={handleAddVideo} style={styles.toolbarButton}>
-            <Icon name="Video" size={24} color={colors.neutral[600]} />
-            <Text style={styles.toolbarLabel}>Video</Text>
-          </Pressable>
+          <View style={styles.divider} />
+          {showFormatting ? (
+            <>
+              <Pressable onPress={() => insertFormat('**', '**')} style={styles.toolbarButton}>
+                <Icon name="Bold" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('_', '_')} style={styles.toolbarButton}>
+                <Icon name="Italic" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('# ')} style={styles.toolbarButton}>
+                <Icon name="Heading" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('- ')} style={styles.toolbarButton}>
+                <Icon name="List" size={20} color={colors.neutral[600]} />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable onPress={handleAddImage} style={styles.toolbarButton}>
+                <Icon name="Image" size={24} color={colors.neutral[600]} />
+                {/* <Text style={styles.toolbarLabel}>Photo</Text> */}
+              </Pressable>
+              <Pressable onPress={handleAddVideo} style={styles.toolbarButton}>
+                <Icon name="Video" size={24} color={colors.neutral[600]} />
+                {/* <Text style={styles.toolbarLabel}>Video</Text> */}
+              </Pressable>
+            </>
+          )}
         </View>
       </KeyboardAvoidingView>
     </Screen>
@@ -157,6 +204,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
   },
+  titleInput: {
+    ...typography.headlineMedium,
+    color: colors.neutral[900],
+    fontWeight: '700',
+    marginBottom: spacing.md,
+  },
   textInput: {
     ...typography.bodyLarge,
     color: colors.neutral[900],
@@ -169,13 +222,23 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.neutral[200],
-    gap: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.md,
   },
   toolbarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
     padding: spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeButton: {
+    backgroundColor: colors.primary[100],
+    borderRadius: 8,
+  },
+  divider: {
+    width: 1,
+    height: 24,
+    backgroundColor: colors.neutral[300],
+    marginHorizontal: spacing.xs,
   },
   toolbarLabel: {
     ...typography.bodyMedium,

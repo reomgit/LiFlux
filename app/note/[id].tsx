@@ -7,7 +7,10 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Screen } from '../../src/components/layout/Screen';
@@ -28,10 +31,14 @@ export default function NoteDetailScreen() {
   const { pickImage, pickVideo } = useMediaPicker();
 
   const [note, setNote] = useState<Note | null>(null);
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [showFormatting, setShowFormatting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     loadNote();
@@ -42,7 +49,9 @@ export default function NoteDetailScreen() {
     setIsLoading(true);
     const fetchedNote = await getNoteById(id);
     if (fetchedNote) {
+      console.log(`[Detail] Loaded note ${id}:`, JSON.stringify(fetchedNote));
       setNote(fetchedNote);
+      setTitle(fetchedNote.title || '');
       setContent(fetchedNote.content);
       setAttachments(fetchedNote.attachments);
     }
@@ -51,10 +60,10 @@ export default function NoteDetailScreen() {
 
   const handleSave = useCallback(async () => {
     if (!note || !hasChanges) return;
-    await updateNote(note.id, { content, attachments });
+    await updateNote(note.id, { title, content, attachments });
     setHasChanges(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, [note, content, attachments, hasChanges, updateNote]);
+  }, [note, title, content, attachments, hasChanges, updateNote]);
 
   const handleDelete = useCallback(() => {
     if (!note) return;
@@ -74,6 +83,20 @@ export default function NoteDetailScreen() {
 
   const handleContentChange = (text: string) => {
     setContent(text);
+    setHasChanges(true);
+  };
+
+  const handleTitleChange = (text: string) => {
+    setTitle(text);
+    setHasChanges(true);
+  };
+
+  const insertFormat = (prefix: string, suffix: string = '') => {
+    const start = selection.start;
+    const end = selection.end;
+    const selectedText = content.substring(start, end);
+    const newText = content.substring(0, start) + prefix + selectedText + suffix + content.substring(end);
+    setContent(newText);
     setHasChanges(true);
   };
 
@@ -151,40 +174,88 @@ export default function NoteDetailScreen() {
         </View>
       </View>
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardDismissMode="interactive"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 44 : 0}
       >
-        <TextInput
-          style={styles.textInput}
-          value={content}
-          onChangeText={handleContentChange}
-          placeholder="Write your note..."
-          placeholderTextColor={colors.neutral[400]}
-          multiline
-          textAlignVertical="top"
-          autoFocus={false}
-        />
-
-        {attachments.length > 0 && (
-          <MediaGrid
-            attachments={attachments}
-            onRemove={handleRemoveAttachment}
-            editable
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="interactive"
+        >
+          <TextInput
+            style={styles.titleInput}
+            value={title}
+            onChangeText={handleTitleChange}
+            placeholder="Title"
+            placeholderTextColor={colors.neutral[400]}
+            multiline
+            maxLength={100}
           />
-        )}
-      </ScrollView>
+          {isEditing ? (
+            <TextInput
+              style={styles.textInput}
+              value={content}
+              onChangeText={handleContentChange}
+              onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+              onBlur={() => setIsEditing(false)}
+              placeholder="Write your note..."
+              placeholderTextColor={colors.neutral[400]}
+              multiline
+              textAlignVertical="top"
+              autoFocus
+            />
+          ) : (
+            <Pressable onPress={() => setIsEditing(true)} style={{ minHeight: 200 }}>
+              <Markdown style={markdownStyles}>
+                {content || 'Write your note...'}
+              </Markdown>
+            </Pressable>
+          )}
 
-      <View style={styles.toolbar}>
-        <Pressable onPress={handleAddImage} style={styles.toolbarButton}>
-          <Icon name="Image" size={24} color={colors.neutral[600]} />
-        </Pressable>
-        <Pressable onPress={handleAddVideo} style={styles.toolbarButton}>
-          <Icon name="Video" size={24} color={colors.neutral[600]} />
-        </Pressable>
-      </View>
+          {attachments.length > 0 && (
+            <MediaGrid
+              attachments={attachments}
+              onRemove={handleRemoveAttachment}
+              editable
+            />
+          )}
+        </ScrollView>
+
+        <View style={styles.toolbar}>
+          <Pressable onPress={() => setShowFormatting(!showFormatting)} style={[styles.toolbarButton, showFormatting && styles.activeButton]}>
+            <Icon name="Type" size={24} color={showFormatting ? colors.primary[600] : colors.neutral[600]} />
+          </Pressable>
+          <View style={styles.divider} />
+          {showFormatting ? (
+            <>
+              <Pressable onPress={() => insertFormat('**', '**')} style={styles.toolbarButton}>
+                <Icon name="Bold" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('_', '_')} style={styles.toolbarButton}>
+                <Icon name="Italic" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('# ')} style={styles.toolbarButton}>
+                <Icon name="Heading" size={20} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={() => insertFormat('- ')} style={styles.toolbarButton}>
+                <Icon name="List" size={20} color={colors.neutral[600]} />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable onPress={handleAddImage} style={styles.toolbarButton}>
+                <Icon name="Image" size={24} color={colors.neutral[600]} />
+              </Pressable>
+              <Pressable onPress={handleAddVideo} style={styles.toolbarButton}>
+                <Icon name="Video" size={24} color={colors.neutral[600]} />
+              </Pressable>
+            </>
+          )}
+        </View>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
@@ -233,15 +304,64 @@ const styles = StyleSheet.create({
     minHeight: 200,
     marginBottom: spacing.lg,
   },
+  titleInput: {
+    ...typography.headlineMedium,
+    color: colors.neutral[900],
+    fontWeight: '700',
+    marginBottom: spacing.md,
+  },
   toolbar: {
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.neutral[200],
-    gap: spacing.lg,
+    alignItems: 'center',
+    gap: spacing.md,
   },
   toolbarButton: {
     padding: spacing.sm,
+  },
+  activeButton: {
+    backgroundColor: colors.primary[100],
+    borderRadius: 8,
+  },
+  divider: {
+    width: 1,
+    height: 24,
+    backgroundColor: colors.neutral[300],
+    marginHorizontal: spacing.xs,
+  },
+});
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    ...typography.bodyLarge,
+    color: colors.neutral[900],
+  },
+  heading1: {
+    ...typography.headlineMedium,
+    color: colors.neutral[900],
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  heading2: {
+    ...typography.titleLarge,
+    color: colors.neutral[900],
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  list_item: {
+    ...typography.bodyLarge,
+    color: colors.neutral[900],
+    marginVertical: spacing.xs,
+  },
+  strong: {
+    fontWeight: 'bold',
+    color: colors.neutral[900],
+  },
+  em: {
+    fontStyle: 'italic',
+    color: colors.neutral[900],
   },
 });

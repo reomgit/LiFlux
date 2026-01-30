@@ -19,6 +19,13 @@ import {
   Play,
   Cloud,
   Circle,
+  Type,
+  Bold,
+  Italic,
+  Heading,
+  List,
+  Pin,
+  Trash2,
   LucideIcon,
 } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
@@ -42,6 +49,13 @@ const iconMap: Record<string, LucideIcon> = {
   Play,
   Cloud,
   Circle,
+  Type,
+  Bold,
+  Italic,
+  Heading,
+  List,
+  Pin,
+  Trash2,
 };
 
 export type IconName = keyof typeof iconMap;
